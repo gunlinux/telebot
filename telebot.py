@@ -20,7 +20,6 @@ CHATS = config.items('chats')
 def format_chat(raw):
     if len(raw) > 0:
         out = ''
-        print(raw)
         for i in raw:
             date = datetime.datetime.fromtimestamp(i['message']['date']).strftime('%d.%m.%y %H:%M:%S')
             username = None
@@ -28,7 +27,8 @@ def format_chat(raw):
                 username = i['message']['from']['username']
             else:
                 username = i['message']['from']['first_name']
-            out += u'{0}: "{1}" [{2}]\n'.format(date, username, i['message']['chat']['id'])
+            info = u'{0}: "{1}" [{2}]'.format(date, username, i['message']['chat']['id'])
+            out += u'{0:45} {1}\n'.format(info, i['message']['text'])
         return out
     return 'No chats yet'
 
@@ -37,7 +37,7 @@ def usage():
         Usage: telebot.py MSSG
                telebot.py MSSG chat_id
                telebot.py info
-               telebot.py chats
+               telebot.py updates
     '''
 
 
@@ -56,7 +56,7 @@ def send_mssg(mssg, chat=None):
     if not chat:
         for chat in CHATS:
             bot.sendMessage(chat[1], mssg, parse_mode='Markdown')
-        return len(chat_list)
+        return len(CHATS)
     bot.sendMessage(chat, mssg, parse_mode='Markdown')
     return 1
 
@@ -65,8 +65,8 @@ if __name__ == '__main__':
     if len(sys.argv) == 2:
         if sys.argv[1] == 'info':
             info()
-        elif sys.argv[1] == 'chats':
-            get_chats()
+        elif sys.argv[1] == 'updates':
+            get_updates()
         else:
             send_mssg(sys.argv[1])
     elif len(sys.argv) == 3:
