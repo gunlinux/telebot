@@ -38,7 +38,14 @@ def usage():
                telebot.py MSSG chat_id
                telebot.py info
                telebot.py updates
+               telebot.py chats
     '''
+
+
+def get_chats():
+    for chat in CHATS:
+        print(chat)
+    return len(CHATS)
 
 
 def info():
@@ -67,6 +74,8 @@ if __name__ == '__main__':
             info()
         elif sys.argv[1] == 'updates':
             get_updates()
+        elif sys.argv[1] == 'chats':
+            get_chats()
         else:
             send_mssg(sys.argv[1])
     elif len(sys.argv) == 3:
