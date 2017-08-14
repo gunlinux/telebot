@@ -45,9 +45,9 @@ def send_mssg(mssg, chat=None):
     bot = telepot.Bot(TOKEN)
     if not chat:
         for chat in chat_list:
-            bot.sendMessage(chat, mssg)
+            bot.sendMessage(chat, mssg, parse_mode='Markdown')
         return len(chat_list)
-    bot.sendMessage(chat, mssg)
+    bot.sendMessage(chat, mssg, parse_mode='Markdown')
     return 1
 
 
