@@ -3,8 +3,18 @@
 import telepot
 import sys
 import datetime
-from config import chat_list, TOKEN
 
+
+try:
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import ConfigParser
+
+config = ConfigParser()
+config.read('config.ini')
+
+TOKEN = config.get('config', 'token')
+CHATS = config.items('chats')
 
 
 def format_chat(raw):
@@ -18,7 +28,7 @@ def format_chat(raw):
                 username = i['message']['from']['username']
             else:
                 username = i['message']['from']['first_name']
-            out += '{0}: "{1}" [{2}]\n'.format(date, username, i['message']['chat']['id'])
+            out += u'{0}: "{1}" [{2}]\n'.format(date, username, i['message']['chat']['id'])
         return out
     return 'No chats yet'
 
@@ -36,7 +46,7 @@ def info():
     print(bot.getMe())
 
 
-def get_chats():
+def get_updates():
     bot = telepot.Bot(TOKEN)
     response = bot.getUpdates()
     print format_chat(response)
@@ -44,8 +54,8 @@ def get_chats():
 def send_mssg(mssg, chat=None):
     bot = telepot.Bot(TOKEN)
     if not chat:
-        for chat in chat_list:
-            bot.sendMessage(chat, mssg, parse_mode='Markdown')
+        for chat in CHATS:
+            bot.sendMessage(chat[1], mssg, parse_mode='Markdown')
         return len(chat_list)
     bot.sendMessage(chat, mssg, parse_mode='Markdown')
     return 1
