@@ -10,9 +10,15 @@ from config import chat_list, TOKEN
 def format_chat(raw):
     if len(raw) > 0:
         out = ''
+        print(raw)
         for i in raw:
             date = datetime.datetime.fromtimestamp(i['message']['date']).strftime('%d.%m.%y %H:%M:%S')
-            out += '{0}: "{1}" [{2}]\n'.format(date, i['message']['from']['username'], i['message']['chat']['id'])
+            username = None
+            if 'username' in i['message']['from'].keys():
+                username = i['message']['from']['username']
+            else:
+                username = i['message']['from']['first_name']
+            out += '{0}: "{1}" [{2}]\n'.format(date, username, i['message']['chat']['id'])
         return out
     return 'No chats yet'
 
