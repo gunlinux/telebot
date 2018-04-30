@@ -1,5 +1,6 @@
 [config]
-token=BOT_API_HERE
+secret=BOT_API_HERE
+tgate=blahblah.gunlinux.ru
 
 [chats]
 USERNAME1=CHAT_ID1

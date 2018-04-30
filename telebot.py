@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-import telepot
 import sys
 import datetime
+import requests
+import hashlib
 
 
 try:
@@ -13,73 +14,38 @@ except ImportError:
 config = ConfigParser()
 config.read('config.ini')
 
-TOKEN = config.get('config', 'token')
+SECRET = config.get('config', 'secret')
 CHATS = config.items('chats')
+TGATE = config.get('config','tgate')
 
-
-def format_chat(raw):
-    if len(raw) > 0:
-        out = ''
-        for i in raw:
-            date = datetime.datetime.fromtimestamp(i['message']['date']).strftime('%d.%m.%y %H:%M:%S')
-            username = None
-            if 'username' in i['message']['from'].keys():
-                username = i['message']['from']['username']
-            else:
-                username = i['message']['from']['first_name']
-            info = u'{0}: "{1}" [{2}]'.format(date, username, i['message']['chat']['id'])
-            out += u'{0:45} {1}\n'.format(info, i['message']['text'])
-        return out
-    return 'No chats yet'
 
 def usage():
-    print '''
+    print('''
         Usage: telebot.py MSSG
                telebot.py MSSG chat_id
-               telebot.py info
-               telebot.py updates
-               telebot.py chats
-    '''
+    ''')
 
+def get_token(mssg):
+    test_hash = hashlib.sha1(mssg.encode()).hexdigest()
+    temp = test_hash + hashlib.sha1(SECRET.encode()).hexdigest()
+    return hashlib.sha1(temp.encode()).hexdigest()
 
-def get_chats():
-    for chat in CHATS:
-        print(chat)
-    return len(CHATS)
-
-
-def info():
-    bot = telepot.Bot(TOKEN)
-    print(bot.getMe())
-
-
-def get_updates():
-    bot = telepot.Bot(TOKEN)
-    response = bot.getUpdates()
-    print format_chat(response)
-
-def send_mssg(mssg, chat=None):
-    bot = telepot.Bot(TOKEN)
-    if not chat:
-        for chat in CHATS:
-            bot.sendMessage(chat[1], mssg, parse_mode='Markdown')
-        return len(CHATS)
-    bot.sendMessage(chat, mssg, parse_mode='Markdown')
-    return 1
+def send_mssg(mssg, chat_id=None):
+    token = get_token(mssg)
+    params = {'mssg': mssg, 'token': token}
+    if not chat_id:
+        params['chats'] = ','.join([i[1] for i in CHATS])
+        r = requests.get('{}/send'.format(TGATE), params=params)
+    else:
+        r = requests.get('{}/send/{}'.format(TGATE, chat_id), params=params)
 
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
-        if sys.argv[1] == 'info':
-            info()
-        elif sys.argv[1] == 'updates':
-            get_updates()
-        elif sys.argv[1] == 'chats':
-            get_chats()
-        else:
-            send_mssg(sys.argv[1])
+        # send all from config
+        send_mssg(sys.argv[1])
     elif len(sys.argv) == 3:
+        # send sing message for someone
         send_mssg(sys.argv[1], sys.argv[2])
     else:
         usage()
-
